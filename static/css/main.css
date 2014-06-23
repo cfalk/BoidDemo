@@ -1,0 +1,29 @@
+body {
+ position:absolute;
+
+ width:100%;
+ height:100%;
+
+ margin:0px;
+ padding:0px;
+}
+
+.boid {
+ display:block;
+ position: absolute;
+ width: 10px;
+ height: 10px;
+
+ background-color:black;
+ border-radius:25px;
+}
+
+#boidUniverse {
+ position:relative;
+ width:100%;
+ height:50%;
+ background-color:steelblue;
+ overflow:hidden;
+ padding:0px;
+ margin:0px;
+}
