@@ -4,7 +4,7 @@ function collectBoidsInRange(boid, otherBoids, outerBoundary, innerBoundary) {
   //Collect any boids within the lineOfSight.
   for (var i=0; i < otherBoids.length; i++){
     var otherBoid = otherBoids[i];
-    var distance = boid.distanceTo(otherBoid);
+    var distance = boid.distToBoid(otherBoid);
     if (distance<=outerBoundary && distance>=innerBoundary) {
       affectedBoidList.push(otherBoid);
     }
@@ -49,18 +49,18 @@ function getRepulsionForce(boid, otherBoids) {
 
 //Get the average velocity [0, 0] of a set of boids.
 function getAverageVelocity(boids) {
-  var totalX = 0;
-  var totalY = 0;
+  var totalDir = 0;
+  var totalSpeed = 0;
 
   for (var i=0; i < boids.length; i++){
-    totalX += boids[i].xVel;
-    totalY += boids[i].yVel;
+    totalDir += boids[i].direction;
+    totalSpeed += boids[i].speed
   }
 
-  var avgX = totalX/parseFloat(boids.length);
-  var avgY = totalY/parseFloat(boids.length);
+  var avgDir = totalDir/parseFloat(boids.length);
+  var avgSpeed = totalSpeed/parseFloat(boids.length);
 
-  return [avgX, avgY];
+  return getTriangle(avgDir, avgSpeed);
 }
 
 

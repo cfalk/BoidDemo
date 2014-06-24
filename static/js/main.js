@@ -1,17 +1,16 @@
 //Variable Setup.
 var boidList = [];  //Keeps track of the boids in the universe.
-var numBoids = 15;   //Keeps track of the number of boids that may exist.
+var numBoids = 50;   //Keeps track of the number of boids that may exist.
 var msPerStep = 20;
-var lineOfSight = 75;
+var lineOfSight = 400;
 
-var maxAxisSpeed = 1; //The max speed a boid can move along an axis.
-var stubbornness = 1;
+var maxAxisSpeed = 5; //The max speed a boid can move along an axis.
 var flockIntensity = 0.5;  //The importance of moving towards other boids.
-var scatterIntensity = 0.5;
-var repulsionFactor = 0.5;
 var followIntensity = 0.5;
-var randomness = 1;
+var randomness = 0.5;
 var comfortRadius = 20;
+var turnIntensity = 0.05;
+var accelIntensity = 0.05;
 
 function step() {
   //Either add/remove Boids depending on the numBoids variable.
@@ -41,23 +40,20 @@ function step() {
       //Steer this boid towards the center of mass.
       var centerOfMass = getCenterOfMass(boidsInRange);
       boid.applyInfluence(centerOfMass, flockIntensity,
-                         stubbornness, maxAxisSpeed);
+                         maxAxisSpeed,
+                        turnIntensity, accelIntensity);
 
-      //TODO:Steer to avoid crowding.
-      //Move away from the boids as well if they are too close.
-      //var repulsionForce = getRepulsionForce(boid, otherBoids);
-      //boid.applyInfluence(repulsionForce, scatterIntensity,
-      //                   stubbornness, maxAxisSpeed);
 
       //And move in the average direction velocity of the local boids.
       var averageVel =getAverageVelocity(otherBoids);
       var influencedPos = [boid.x+averageVel[0], boid.y+averageVel[1]];
       boid.applyInfluence(influencedPos, followIntensity,
-                         stubbornness, maxAxisSpeed);
+                          maxAxisSpeed,
+                          turnIntensity, accelIntensity);
     }
 
     //Apply each boid's new velocity to their position.
-    boid.move(randomness);
+    boid.move(randomness, turnIntensity, accelIntensity);
   }
 }
 

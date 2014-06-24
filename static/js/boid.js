@@ -3,8 +3,8 @@ function Boid() {
   this.x = 0;
   this.y = 0;
 
-  this.xVel = 0;
-  this.yVel = 0;
+  this.speed = 0;
+  this.direction = 0;
 
   //Bind this Boid object to a .boid DOM element.
   var universe = document.getElementById("boidUniverse");
@@ -37,19 +37,66 @@ Boid.prototype.setPosition = function(newX, newY) {
 }
 
 //Apply a new position [x,y] to this Boid's velocity.
-Boid.prototype.applyInfluence = function(newPos, intensity, stubborness, max){
-  var xDir = (newPos[0]-this.x)*intensity;
-  var newVelX = this.xVel + (this.xVel+xDir)/stubbornness;
-  if (newVelX>max) newVelX=max;
-  if (newVelX<-max) newVelX=-max;
-  this.xVel = newVelX;
+Boid.prototype.applyInfluence = function(attractionPoint, intensity,
+                                         maxSpeed, turnIntensity, accelIntensity){
+  function evaluateOption(option, boid) {
+    option.action();
+    var nextPos = boid.plannedPos();
+    option.distance = distBetweenPoints(nextPos, attractionPoint);
+    option.unaction();
+  }
 
-  var yDir = (newPos[1]-this.y)*intensity;
-  var newVelY = this.yVal = (this.yVel+yDir)/stubbornness;
-  if (newVelY>max) newVelY=max;
-  if (newVelY<-max) newVelY=-max;
+  var boid = this;
+  var options=[
+    {
+      distance:9999, //Turn Left
+      action: function() {
+        this.oldDirection = boid.direction;
+        boid.direction += turnIntensity*intensity;
+      },
+      unaction: function() { boid.direction = this.oldDirection }
+    },
+    {
+      distance:9999, //Turn Right
+      action: function() {
+        this.oldDirection = boid.direction;
+        boid.direction -= turnIntensity*intensity;
+      },
+      unaction: function() { boid.direction = this.oldDirection }
+    },
+    {
+      distance:9999, //Speed Up
+      action: function() {
+        this.oldSpeed = boid.speed;
+        boid.speed += accelIntensity*intensity;
+        if (boid.speed+accelIntensity>maxSpeed) boid.speed = maxSpeed;
+      },
+      unaction: function() { boid.speed = this.oldSpeed; }
+    },
+/*  {
+      distance:9999, //Slow Down
+      action: function() {
+        this.oldSpeed = boid.speed;
+        boid.speed -= accelIntensity;
+        if (boid.speed-accelIntensity<0) boid.speed = 0;
+      },
+      unaction: function() {
+        boid.speed = this.oldSpeed;
+      }
+    }*/
+  ]
 
-  this.yVel = newVelY;
+  for (var i=0; i < options.length ; i++) {
+    var option = options[i];
+    evaluateOption(option, boid);
+  }
+
+  options.sort(function(a,b){
+    return a.distance-b.distance;
+  });
+  console.log(options);
+  options[0].action();
+
 }
 
 //Teleport this Boid to a random position in the #universe.
@@ -60,8 +107,8 @@ Boid.prototype.randomTeleport = function(maxVel) {
   var randomYPos = Math.random()*universe.offsetHeight;
 
   //Randomize the velocities (and directions).
-  this.xVel=Math.random()*maxVel * ((Math.random()<0.5) ? -1 : 1);
-  this.yVel=Math.random()*maxVel * ((Math.random()<0.5) ? -1 : 1);
+  this.direction=Math.random()*2;
+  this.speed=Math.random()*maxVel;
 
   this.setPosition(randomXPos, randomYPos);
 }
@@ -72,24 +119,51 @@ Boid.prototype.redraw = function() {
   this.element.style.left = this.x + "px";
 }
 
-//Update this Boid's [x, y] position by adding its velocity.
-Boid.prototype.move = function(randomness) {
-  var xRandom = Math.random()*randomness * ((Math.random()<0.5) ? -1 : 1);
-  var yRandom = Math.random()*randomness * ((Math.random()<0.5) ? -1 : 1);
-  var newX = this.x+this.xVel + xRandom;
-  var newY = this.y+this.yVel + yRandom;
-  this.setPosition(newX, newY);
+//Get the next position [x, y] of this Boid after applying velocity.
+Boid.prototype.plannedPos = function() {
+  this.direction %= 2;
+
+  var lengths = getTriangle(this.direction, this.speed);
+  var newX = this.x+lengths[0];
+  var newY = this.y-lengths[1];
+
+  return [newX, newY];
 }
 
-//Returns the velocity [xVel, yVel] of this Boid.
-Boid.prototype.getVel = function() {
-  return [this.xVel, this.yVel];
+function getTriangle(direction, speed){
+  var angle = direction*Math.PI
+  var x = Math.cos(angle)*speed
+  var y = Math.sin(angle)*speed
+  return [x, y];
 }
+
+//Update this Boid's [x, y] position by adding its velocity.
+Boid.prototype.move = function(randomness, maxTurn) {
+  //Either add or remove a little from the direction of the Boid.
+  if (Math.random() < randomness){
+    var sign =  (Math.random()>.5) ? -1: 1 ;
+    this.direction += Math.random() * maxTurn * sign
+  }
+
+  var nextPos = this.plannedPos();
+  this.setPosition(nextPos[0], nextPos[1]);
+}
+
 
 //Get the distance between this Boid and another Boid.
-Boid.prototype.distanceTo = function(boid) {
-  var xDiff = this.x-boid.x;
-  var yDiff = this.y-boid.y;
+Boid.prototype.distToBoid = function(boid) {
+  return this.distToPoint([boid.x, boid.y]);
+}
+
+//Get the distance between this Boid and a query point [x, y].
+Boid.prototype.distToPoint = function(tuple) {
+  return distBetweenPoints([this.x, this.y], tuple);
+}
+
+//Get the distance between two point tuples [x, y] and [x2. y2].
+function distBetweenPoints(tuple1, tuple2){
+  var xDiff = tuple1[0]-tuple2[1];
+  var yDiff = tuple1[0]-tuple2[1];
   return Math.sqrt((xDiff*xDiff)+(yDiff*yDiff));
 }
 
