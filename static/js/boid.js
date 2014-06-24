@@ -38,7 +38,7 @@ Boid.prototype.setPosition = function(newX, newY) {
 
 //Apply a new position [x,y] to this Boid's velocity.
 Boid.prototype.applyInfluence = function(attractionPoint, intensity,
-                                         maxSpeed, turnIntensity, accelIntensity){
+                                         turnIntensity, accelIntensity){
   function evaluateOption(option, boid) {
     option.action();
     var nextPos = boid.plannedPos();
@@ -69,21 +69,9 @@ Boid.prototype.applyInfluence = function(attractionPoint, intensity,
       action: function() {
         this.oldSpeed = boid.speed;
         boid.speed += accelIntensity*intensity;
-        if (boid.speed+accelIntensity>maxSpeed) boid.speed = maxSpeed;
       },
       unaction: function() { boid.speed = this.oldSpeed; }
-    },
-/*  {
-      distance:9999, //Slow Down
-      action: function() {
-        this.oldSpeed = boid.speed;
-        boid.speed -= accelIntensity;
-        if (boid.speed-accelIntensity<0) boid.speed = 0;
-      },
-      unaction: function() {
-        boid.speed = this.oldSpeed;
-      }
-    }*/
+    }
   ]
 
   for (var i=0; i < options.length ; i++) {
@@ -94,7 +82,6 @@ Boid.prototype.applyInfluence = function(attractionPoint, intensity,
   options.sort(function(a,b){
     return a.distance-b.distance;
   });
-  console.log(options);
   options[0].action();
 
 }
@@ -138,12 +125,20 @@ function getTriangle(direction, speed){
 }
 
 //Update this Boid's [x, y] position by adding its velocity.
-Boid.prototype.move = function(randomness, maxTurn) {
+Boid.prototype.move = function(randomness, maxTurn, maxSpeed) {
   //Either add or remove a little from the direction of the Boid.
   if (Math.random() < randomness){
     var sign =  (Math.random()>.5) ? -1: 1 ;
     this.direction += Math.random() * maxTurn * sign
+
+    if (this.speed > maxSpeed*0.25 && Math.random()>0.5){
+      this.speed *= 0.95;
+    } else {
+      this.speed *= 1.05;
+    }
   }
+
+  if (this.speed>maxSpeed) this.speed *= 0.8;
 
   var nextPos = this.plannedPos();
   this.setPosition(nextPos[0], nextPos[1]);

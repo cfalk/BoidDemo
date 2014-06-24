@@ -1,11 +1,30 @@
+@import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700);
+
+a {
+ text-decoration:none;
+ font-weight:bold;
+ color:inherit;
+ opacity:0.7;
+ z-index:99;
+}
+a:hover {
+ opacity:0.9;
+}
+
 body {
  position:absolute;
+ text-align:center;
 
  width:100%;
  height:100%;
 
  margin:0px;
  padding:0px;
+
+ background-color:#08306b;
+
+ color:white;
+ font-family:"PT Sans Narrow";
 }
 
 .boid {
@@ -15,15 +34,80 @@ body {
  height: 10px;
 
  background-color:black;
+ border:1px solid #081d58;
+ border-top-color:#040E2A;
  border-radius:25px;
 }
 
+#controlPanel {
+ box-sizing:border-box;
+ height:35%;
+ display:block;
+ width:600px;
+ margin:0px auto;
+}
+
+label {
+ box-sizing:border-box;
+ display:block;
+ margin:10px 0px;
+ padding:5px 15px;
+
+ float:left;
+ width:200px;
+
+ background-color:#062655;
+ color:white;
+}
+
+input[type=range]{
+ cursor:pointer;
+}
+
 #boidUniverse {
+ box-sizing:border-box;
  position:relative;
  width:100%;
- height:50%;
- background-color:steelblue;
+ height:65%;
+ background-color:#deebf7;
  overflow:hidden;
  padding:0px;
  margin:0px;
 }
+
+#copyright {
+ position:absolute;
+ left:0px;
+ bottom:0px;
+ color:#08306b;
+ font-size:1.2em;
+ cursor:default;
+ background:rgba(250,250,250,0.8);
+ padding:2px 10px 0px 0px;
+ z-index:99;
+}
+
+#gitHubLink {
+ position:absolute;
+ background: url("http://icons.iconarchive.com/icons/visualpharm/icons8-metro-style/256/Logos-Github-icon.png");
+ background-size:contain;
+ width:30px;
+ height:30px;
+ margin:5px;
+ right:0px;
+ bottom:0px;
+}
+
+#moreLink {
+ position:absolute;
+ color:black;
+ right:0px;
+ font-size:2em;
+ padding:2px 15px;
+ background-color:rgba(250,250,250,0.5);
+}
+
+#moreLink:hover {
+ background-color:rgba(250,250,250,0.8);
+}
+

@@ -1,18 +1,25 @@
 //Variable Setup.
 var boidList = [];  //Keeps track of the boids in the universe.
-var numBoids = 50;   //Keeps track of the number of boids that may exist.
 var msPerStep = 20;
-var lineOfSight = 400;
-
-var maxAxisSpeed = 5; //The max speed a boid can move along an axis.
-var flockIntensity = 0.5;  //The importance of moving towards other boids.
-var followIntensity = 0.5;
-var randomness = 0.5;
-var comfortRadius = 20;
-var turnIntensity = 0.05;
-var accelIntensity = 0.05;
 
 function step() {
+
+  //Keeps track of the number of boids that may exist.
+  var numBoids = document.getElementById("numBoids").value;
+  //The range in which a Boid will follow another Boid.
+  var lineOfSight = document.getElementById("lineOfSight").value;
+  //The max speed a boid can move along an axis.
+  var maxAxisSpeed = document.getElementById("maxAxisSpeed").value;
+  //
+  var randomness = document.getElementById("randomness").value;
+  var comfortRadius = document.getElementById("comfortRadius").value;
+
+  var flockIntensity = document.getElementById("flockIntensity").value/100.0;
+  var followIntensity = document.getElementById("followIntensity").value/100.0;
+  var turnIntensity = document.getElementById("turnIntensity").value/100.0;
+  var accelIntensity = document.getElementById("accelIntensity").value/100.0;
+
+
   //Either add/remove Boids depending on the numBoids variable.
   if (boidList.length < numBoids) {
     var newBoid = new Boid();
@@ -24,7 +31,7 @@ function step() {
     //Delete the .boid element from the #universe.
     boidList[0].remove();
     //And delete it from the boidList.
-    delete boidList[0];
+    boidList.shift();
   }
 
   //Update the velocity and position of each Boid.
@@ -40,7 +47,6 @@ function step() {
       //Steer this boid towards the center of mass.
       var centerOfMass = getCenterOfMass(boidsInRange);
       boid.applyInfluence(centerOfMass, flockIntensity,
-                         maxAxisSpeed,
                         turnIntensity, accelIntensity);
 
 
@@ -48,12 +54,11 @@ function step() {
       var averageVel =getAverageVelocity(otherBoids);
       var influencedPos = [boid.x+averageVel[0], boid.y+averageVel[1]];
       boid.applyInfluence(influencedPos, followIntensity,
-                          maxAxisSpeed,
                           turnIntensity, accelIntensity);
     }
 
     //Apply each boid's new velocity to their position.
-    boid.move(randomness, turnIntensity, accelIntensity);
+    boid.move(randomness, turnIntensity, maxAxisSpeed);
   }
 }
 

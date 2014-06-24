@@ -10,7 +10,34 @@
 </head>
 
 <body>
-<div id="boidUniverse"></div>
+<div id="boidUniverse">
+<a href="https://github.com/cfalk/BoidDemo"><div id="gitHubLink"></div></a>
+<a href="http://www.red3d.com/cwr/boids/" id="moreLink">?</a>
+
+<div id="copyright">&copy;2014 Boid Demonstrator by
+  <a href="http://caseyfalk.com">Casey Falk</a></div>
+</div>
+<div id="controlPanel">
+  <label for="numBoids">Boid Count:
+    <input id="numBoids" type="range" name="numBoids" min="1" max="50"/></label>
+  <label for="lineOfSight">Line of Sight:
+    <input id="lineOfSight" type="range" name="lineOfSight" min="1" max="500"/></label>
+  <label for="maxAxisSpeed">Max Speed:
+    <input id="maxAxisSpeed" type="range" name="maxAxisSpeed" min="0.1" value="2" max="20"/></label>
+  <label for="randomness">Randomness:
+    <input id="randomness" type="range" name="randomness" min="1" max="50"/></label>
+  <label for="comfortRadius">Comfort Radius:
+    <input id="comfortRadius" type="range" name="comfortRadius" min="0" value="20" max="200"/></label>
+
+  <label for="flockIntensity">Flock Intensity:
+    <input id="flockIntensity" type="range" name="flockIntensity" min="0" value="5" max="100"/></label>
+  <label for="followIntensity">Follow Intensity:
+    <input id="followIntensity" type="range" name="followIntensity" min="0" value="5" max="100"/></label>
+  <label for="turnIntensity">Turn Intensity:
+    <input id="turnIntensity" type="range" name="turnIntensity" min="0" value="5" max="100"/></label>
+  <label for="accelIntensity">Acceleration:
+    <input id="accelIntensity" type="range" name="accelIntensity" min="0" value="5" max="100"/></label>
+</div>
 </body>
 
 <!-- Javascript Imports -->
