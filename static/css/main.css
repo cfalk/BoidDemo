@@ -39,6 +39,10 @@ body {
  border-radius:25px;
 }
 
+.boid.influenced {
+ background-color:red;
+}
+
 #controlPanel {
  box-sizing:border-box;
  height:35%;

@@ -5,8 +5,20 @@ function collectBoidsInRange(boid, otherBoids, outerBoundary, innerBoundary) {
   for (var i=0; i < otherBoids.length; i++){
     var otherBoid = otherBoids[i];
     var distance = boid.distToBoid(otherBoid);
+
     if (distance<=outerBoundary && distance>=innerBoundary) {
-      affectedBoidList.push(otherBoid);
+      //If the otherBoid is within range, make sure it is "viewable" by the boid.
+      //  That is, make sure it isn't "behind" the current boid.
+      var xDiff = boid.x-otherBoid.x;
+      var yDiff = boid.y-otherBoid.y;
+      var directionToBoid = (Math.atan2(yDiff, xDiff)/Math.PI+2)%2
+      var directionDiff = Math.abs(directionToBoid-boid.direction);
+      if (directionDiff>1) directionDiff -= 1;
+
+      var peripheralRange = 0.2; //On a 0-1 scale.
+      if (directionDiff <= peripheralRange){
+        affectedBoidList.push(otherBoid);
+      }
     }
   }
 

@@ -4,7 +4,7 @@ function Boid() {
   this.y = 0;
 
   this.speed = 0;
-  this.direction = 0;
+  this.direction = 0; //In radian "steps." That is, x in (x*Math.PI).
 
   //Bind this Boid object to a .boid DOM element.
   var universe = document.getElementById("boidUniverse");
@@ -129,7 +129,7 @@ Boid.prototype.move = function(randomness, maxTurn, maxSpeed) {
   //Either add or remove a little from the direction of the Boid.
   if (Math.random() < randomness){
     var sign =  (Math.random()>.5) ? -1: 1 ;
-    this.direction += Math.random() * maxTurn * sign
+    this.direction += (Math.random() * maxTurn * sign)%2
 
     if (this.speed > maxSpeed*0.25 && Math.random()>0.5){
       this.speed *= 0.95;
@@ -157,8 +157,8 @@ Boid.prototype.distToPoint = function(tuple) {
 
 //Get the distance between two point tuples [x, y] and [x2. y2].
 function distBetweenPoints(tuple1, tuple2){
-  var xDiff = tuple1[0]-tuple2[1];
-  var yDiff = tuple1[0]-tuple2[1];
+  var xDiff = tuple1[0]-tuple2[0];
+  var yDiff = tuple1[1]-tuple2[1];
   return Math.sqrt((xDiff*xDiff)+(yDiff*yDiff));
 }
 

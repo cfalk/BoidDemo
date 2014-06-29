@@ -34,6 +34,7 @@ function step() {
     boidList.shift();
   }
 
+
   //Update the velocity and position of each Boid.
   for (var i=0; i < boidList.length ; i++){
     var boid = boidList[i];
@@ -44,6 +45,11 @@ function step() {
     var boidsInRange = collectBoidsInRange(boid, otherBoids,
                                            lineOfSight, comfortRadius);
     if (boidsInRange.length) {
+      //If this Boid is being influenced by other Boids, visualize it.
+      if (boid.element.className.indexOf("influenced")<0){
+        boid.element.className += " influenced";
+      }
+
       //Steer this boid towards the center of mass.
       var centerOfMass = getCenterOfMass(boidsInRange);
       boid.applyInfluence(centerOfMass, flockIntensity,
@@ -55,6 +61,8 @@ function step() {
       var influencedPos = [boid.x+averageVel[0], boid.y+averageVel[1]];
       boid.applyInfluence(influencedPos, followIntensity,
                           turnIntensity, accelIntensity);
+    } else {
+      boid.element.className = boid.element.className.replace(" influenced","");
     }
 
     //Apply each boid's new velocity to their position.
