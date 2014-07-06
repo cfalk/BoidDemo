@@ -30,17 +30,17 @@ body {
 .boid {
  display:block;
  position: absolute;
- width: 10px;
- height: 10px;
 
- background-color:black;
- border:1px solid #081d58;
- border-top-color:#040E2A;
- border-radius:25px;
+ border-radius:10px;
+
+ width:1px;
+ height: 1px;
+ border: 5px solid transparent;
+ border-bottom: 10px solid blue;
 }
 
 .boid.influenced {
- background-color:red;
+ border-bottom-color:red;
 }
 
 #controlPanel {

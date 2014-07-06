@@ -16,9 +16,9 @@ function collectBoidsInRange(boid, otherBoids, outerBoundary, innerBoundary) {
       if (directionDiff>1) directionDiff -= 1;
 
       var peripheralRange = 0.2; //On a 0-1 scale.
-      if (directionDiff <= peripheralRange){
+//      if (directionDiff <= peripheralRange){
         affectedBoidList.push(otherBoid);
-      }
+//      }
     }
   }
 

@@ -102,8 +102,17 @@ Boid.prototype.randomTeleport = function(maxVel) {
 
 //Draw this boid in its current [x, y] position in the #universe.
 Boid.prototype.redraw = function() {
+  //Redraw the position of the boid.
   this.element.style.top = this.y + "px";
   this.element.style.left = this.x + "px";
+
+  //Rotate the boid.
+  var deg = this.direction*Math.PI
+  this.element.style.webkitTransform = 'rotate('+deg+'rad)';
+  this.element.style.mozTransform    = 'rotate('+deg+'rad)';
+  this.element.style.msTransform     = 'rotate('+deg+'rad)';
+  this.element.style.oTransform      = 'rotate('+deg+'rad)';
+  this.element.style.transform       = 'rotate('+deg+'rad)';
 }
 
 //Get the next position [x, y] of this Boid after applying velocity.
@@ -119,8 +128,8 @@ Boid.prototype.plannedPos = function() {
 
 function getTriangle(direction, speed){
   var angle = direction*Math.PI
-  var x = Math.cos(angle)*speed
-  var y = Math.sin(angle)*speed
+  var x = Math.sin(angle)*speed
+  var y = Math.cos(angle)*speed
   return [x, y];
 }
 
@@ -131,11 +140,8 @@ Boid.prototype.move = function(randomness, maxTurn, maxSpeed) {
     var sign =  (Math.random()>.5) ? -1: 1 ;
     this.direction += (Math.random() * maxTurn * sign)%2
 
-    if (this.speed > maxSpeed*0.25 && Math.random()>0.5){
-      this.speed *= 0.95;
-    } else {
-      this.speed *= 1.05;
-    }
+    if (this.speed==0) this.speed=0.1;
+    this.speed *= 1.05;
   }
 
   if (this.speed>maxSpeed) this.speed *= 0.8;
