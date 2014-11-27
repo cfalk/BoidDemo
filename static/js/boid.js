@@ -14,6 +14,12 @@ function Boid() {
   newElement.style.display="show";
   this.element = newElement;
 
+  var newGoal = document.createElement("div");
+  newGoal.className += " goalPoint";
+  universe.appendChild(newGoal);
+  newGoal.style.display="show";
+  this.goalPoint = newGoal;
+
 }
 
 //Returns the [x,y] position of the Boid.
@@ -37,52 +43,7 @@ Boid.prototype.setPosition = function(newX, newY) {
 }
 
 //Apply a new position [x,y] to this Boid's velocity.
-Boid.prototype.applyInfluence = function(attractionPoint, intensity,
-                                         turnIntensity, accelIntensity){
-  function evaluateOption(option, boid) {
-    option.action();
-    var nextPos = boid.plannedPos();
-    option.distance = distBetweenPoints(nextPos, attractionPoint);
-    option.unaction();
-  }
-
-  var boid = this;
-  var options=[
-    {
-      distance:9999, //Turn Left
-      action: function() {
-        this.oldDirection = boid.direction;
-        boid.direction += turnIntensity*intensity;
-      },
-      unaction: function() { boid.direction = this.oldDirection }
-    },
-    {
-      distance:9999, //Turn Right
-      action: function() {
-        this.oldDirection = boid.direction;
-        boid.direction -= turnIntensity*intensity;
-      },
-      unaction: function() { boid.direction = this.oldDirection }
-    },
-    {
-      distance:9999, //Speed Up
-      action: function() {
-        this.oldSpeed = boid.speed;
-        boid.speed += accelIntensity*intensity;
-      },
-      unaction: function() { boid.speed = this.oldSpeed; }
-    }
-  ]
-
-  for (var i=0; i < options.length ; i++) {
-    var option = options[i];
-    evaluateOption(option, boid);
-  }
-
-  options.sort(function(a,b){
-    return a.distance-b.distance;
-  });
-  options[0].action();
+Boid.prototype.applyInfluence = function(newCenter) {
 
 }
 
@@ -94,8 +55,8 @@ Boid.prototype.randomTeleport = function(maxVel) {
   var randomYPos = Math.random()*universe.offsetHeight;
 
   //Randomize the velocities (and directions).
-  this.direction=Math.random()*2;
-  this.speed=Math.random()*maxVel;
+  this.direction=Math.random()*2; //TODO: Direction seems wrong. Fix to right?
+  this.speed=Math.random()*maxVel+0.1;
 
   this.setPosition(randomXPos, randomYPos);
 }
@@ -117,39 +78,75 @@ Boid.prototype.redraw = function() {
 
 //Get the next position [x, y] of this Boid after applying velocity.
 Boid.prototype.plannedPos = function() {
-  this.direction %= 2;
-
-  var lengths = getTriangle(this.direction, this.speed);
-  var newX = this.x+lengths[0];
-  var newY = this.y-lengths[1];
-
-  return [newX, newY];
+  var newPos = this.getTriangle(this.direction, this.speed);
+  return newPos;
 }
 
-function getTriangle(direction, speed){
+Boid.prototype.getTriangle = function(direction, speed){
+  this.direction = (this.direction+2)%2;
   var angle = direction*Math.PI
   var x = Math.sin(angle)*speed
   var y = Math.cos(angle)*speed
-  return [x, y];
+  return [this.x + x, this.y-y];
+}
+
+Boid.prototype.directionTo = function(vector) {
+  var x = vector[0] - this.x;
+  var y = vector[1] - this.y;
+  return (Math.atan2(y,x)/Math.PI+2.5 ) % 2;
+}
+
+function randomSign(){
+  return (Math.random()>.5) ? -1: 1 ;
 }
 
 //Update this Boid's [x, y] position by adding its velocity.
-Boid.prototype.move = function(randomness, maxTurn, maxSpeed) {
-  //Either add or remove a little from the direction of the Boid.
-  if (Math.random() < randomness){
-    var sign =  (Math.random()>.5) ? -1: 1 ;
-    this.direction += (Math.random() * maxTurn * sign)%2
+Boid.prototype.move = function(influenceVector, randomness, maxTurn, maxSpeed, acceleration, sight) {
 
-    if (this.speed==0) this.speed=0.1;
-    this.speed *= 1.05;
+  //Make movement more fluid by slowing down when close to the influenceVector
+  friction = 0.1;
+  if (influenceVector.length) {
+
+    //Redraw the boid influence point.
+    this.goalPoint.style["display"]="block";
+    this.goalPoint.style.left = influenceVector[0] + 5+ "px";
+    this.goalPoint.style.top = influenceVector[1] + 5 +"px";
+
+    var distance = this.distToPoint(influenceVector);
+    var lookahead = this.speed*sight/2;
+    this.speed += acceleration*friction;
+
+    var dirTo = this.directionTo(influenceVector);
+    console.log(dirTo);
+    var diff = this.direction - dirTo
+    //console.log(this.direction + " " + dirTo);
+    var sign = (diff>0);
+    turn = Math.min(Math.abs(diff), maxTurn);
+    this.direction -= turn*sign
+    this.direction = dirTo;
+
+  } else {
+    this.goalPoint.style["display"]="none";
+
   }
 
-  if (this.speed>maxSpeed) this.speed *= 0.8;
+  //Either add or remove a little from the direction of the Boid.
+  if (Math.random() < randomness){
+    this.direction += (Math.random() * maxTurn * randomness * randomSign())
+    this.speed += parseFloat((Math.random() * randomness * 0.1 * randomSign()));
 
+  }
+
+  if (this.speed<0) this.speed = 0;
+  if (this.speed>maxSpeed) this.speed = maxSpeed;
+
+  this.step();
+}
+
+Boid.prototype.step = function() {
   var nextPos = this.plannedPos();
   this.setPosition(nextPos[0], nextPos[1]);
 }
-
 
 //Get the distance between this Boid and another Boid.
 Boid.prototype.distToBoid = function(boid) {
@@ -173,5 +170,6 @@ Boid.prototype.remove = function() {
   //Remove the DOM element.
   var universe = document.getElementById("boidUniverse");
   universe.removeChild(this.element);
+  universe.removeChild(this.goalPoint);
 }
 

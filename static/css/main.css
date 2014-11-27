@@ -27,6 +27,15 @@ body {
  font-family:"PT Sans Narrow";
 }
 
+.goalPoint {
+ display:none;
+ position:absolute;
+ background-color:green;
+ border-radius:25px;
+ width:5px;
+ height:5px;
+}
+
 .boid {
  display:block;
  position: absolute;

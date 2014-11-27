@@ -16,7 +16,7 @@ function collectBoidsInRange(boid, otherBoids, outerBoundary, innerBoundary) {
       if (directionDiff>1) directionDiff -= 1;
 
       var peripheralRange = 0.2; //On a 0-1 scale.
-//      if (directionDiff <= peripheralRange){
+//      if (directionDiff <= peripheralRange){ //TODO
         affectedBoidList.push(otherBoid);
 //      }
     }
@@ -27,7 +27,7 @@ function collectBoidsInRange(boid, otherBoids, outerBoundary, innerBoundary) {
 
 
 //Get the center of mass [x, y] of all boids in a list.
-function getCenterOfMass(boids){
+function getCenterVec(boids){
   var totalX = 0;
   var totalY = 0;
 
@@ -43,24 +43,24 @@ function getCenterOfMass(boids){
 }
 
 //Get a local position [x, y] farthest from all the otherBoids.
-function getRepulsionForce(boid, otherBoids) {
+function getRepulsionVec(boid, otherBoids) {
   var newX = boid.x;
   var newY = boid.y;
 
   for (var i=0; i < otherBoids.length; i++){
     var otherBoid = otherBoids[i];
-    var velDiff = [boid.xVel-otherBoid.xVel, boid.yVel-otherBoid.yVel];
-
-    newX -= velDiff[0];
-    newY -= velDiff[1];
-
+    var oppDir = boid.directionTo(otherBoid.getPosition())+1;
+    var distance = boid.distToBoid(otherBoid);
+    var newPos = boid.getTriangle(oppDir,10);
+    newX += newPos[0];
+    newY += newPos[1];
   }
 
-  return [newX, newY];
+  return [newX/otherBoids.length, newY/otherBoids.length];
 }
 
 //Get the average velocity [0, 0] of a set of boids.
-function getAverageVelocity(boids) {
+function getVelocityVec(boid, boids) {
   var totalDir = 0;
   var totalSpeed = 0;
 
@@ -72,7 +72,7 @@ function getAverageVelocity(boids) {
   var avgDir = totalDir/parseFloat(boids.length);
   var avgSpeed = totalSpeed/parseFloat(boids.length);
 
-  return getTriangle(avgDir, avgSpeed);
+  return boid.getTriangle(avgDir, avgSpeed);
 }
 
 

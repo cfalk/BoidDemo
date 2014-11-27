@@ -2,6 +2,15 @@
 var boidList = [];  //Keeps track of the boids in the universe.
 var msPerStep = 20;
 
+function overallInfluence(v1, v2, v3, weights) {
+  avgVec = [];
+  for (var i=0; i<v1.length; i++) {
+    var avg = (v1[i]*weights[0]+v2[i]*weights[1]+v3[i]*weights[2])/3.0
+    avgVec.push(avg);
+  }
+  return avgVec;
+}
+
 function step() {
 
   //Keeps track of the number of boids that may exist.
@@ -9,15 +18,15 @@ function step() {
   //The range in which a Boid will follow another Boid.
   var lineOfSight = document.getElementById("lineOfSight").value;
   //The max speed a boid can move along an axis.
-  var maxAxisSpeed = document.getElementById("maxAxisSpeed").value;
+  var maxAxisSpeed = parseFloat(document.getElementById("maxAxisSpeed").value);
   //
-  var randomness = document.getElementById("randomness").value;
-  var comfortRadius = document.getElementById("comfortRadius").value;
+  var randomness = parseFloat(document.getElementById("randomness").value)/100.0;
+  var comfortRadius = parseFloat(document.getElementById("comfortRadius").value);
 
-  var flockIntensity = document.getElementById("flockIntensity").value/100.0;
-  var followIntensity = document.getElementById("followIntensity").value/100.0;
-  var turnIntensity = document.getElementById("turnIntensity").value/100.0;
-  var accelIntensity = document.getElementById("accelIntensity").value/100.0;
+  var flockIntensity = parseFloat(document.getElementById("flockIntensity").value)/100.0
+  var followIntensity = parseFloat(document.getElementById("followIntensity").value)/100.0
+  var turnIntensity = parseFloat(document.getElementById("turnIntensity").value)/100.0
+  var accelIntensity = parseFloat(document.getElementById("accelIntensity").value)/100.0
 
 
   //Either add/remove Boids depending on the numBoids variable.
@@ -50,23 +59,19 @@ function step() {
         boid.element.className += " influenced";
       }
 
-      //Steer this boid towards the center of mass.
-      var centerOfMass = getCenterOfMass(boidsInRange);
-      boid.applyInfluence(centerOfMass, flockIntensity,
-                        turnIntensity, accelIntensity);
+      var flockVec = getCenterVec(otherBoids)
+      var repVec = getRepulsionVec(boid, otherBoids)
+      var velVec = getVelocityVec(boid, otherBoids)
+      var weights = [0,3,0]
+      var influenceVector = overallInfluence(flockVec,repVec,velVec, weights);
 
-
-      //And move in the average direction velocity of the local boids.
-      var averageVel =getAverageVelocity(otherBoids);
-      var influencedPos = [boid.x+averageVel[0], boid.y+averageVel[1]];
-      boid.applyInfluence(influencedPos, followIntensity,
-                          turnIntensity, accelIntensity);
     } else {
       boid.element.className = boid.element.className.replace(" influenced","");
+      var influenceVector = [];
     }
 
     //Apply each boid's new velocity to their position.
-    boid.move(randomness, turnIntensity, maxAxisSpeed);
+    boid.move(influenceVector, randomness, turnIntensity, maxAxisSpeed,accelIntensity, lineOfSight);
   }
 }
 
